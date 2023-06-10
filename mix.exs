@@ -1,9 +1,9 @@
-defmodule WebAuthnLiveview.MixProject do
+defmodule Phoenix2FA.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :web_authn_liveview,
+      app: :phoenix_2fa,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule WebAuthnLiveview.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {WebAuthnLiveview.Application, []},
+      mod: {Phoenix2FA.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -32,6 +32,7 @@ defmodule WebAuthnLiveview.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.7.2"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},

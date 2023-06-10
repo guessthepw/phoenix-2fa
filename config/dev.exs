@@ -1,14 +1,15 @@
 import Config
 
 # Configure your database
-config :web_authn_liveview, WebAuthnLiveview.Repo,
+config :phoenix_2fa, Phoenix2FA.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "web_authn_liveview_dev",
+  database: "phoenix_2fa_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  port: 5435
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -16,7 +17,7 @@ config :web_authn_liveview, WebAuthnLiveview.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
-config :web_authn_liveview, WebAuthnLiveviewWeb.Endpoint,
+config :phoenix_2fa, Phoenix2FAWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
@@ -53,17 +54,17 @@ config :web_authn_liveview, WebAuthnLiveviewWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :web_authn_liveview, WebAuthnLiveviewWeb.Endpoint,
+config :phoenix_2fa, Phoenix2FAWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/web_authn_liveview_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/phoenix_2fa_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :web_authn_liveview, dev_routes: true
+config :phoenix_2fa, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

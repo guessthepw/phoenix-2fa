@@ -1,4 +1,4 @@
-# WebAuthnLiveview
+# Phoenix2FA
 
 To start your Phoenix server:
 

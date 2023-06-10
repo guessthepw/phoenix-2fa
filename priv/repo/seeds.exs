@@ -5,7 +5,7 @@
 # Inside the script, you can read and write to any of your
 # repositories directly:
 #
-#     WebAuthnLiveview.Repo.insert!(%WebAuthnLiveview.SomeSchema{})
+#     Phoenix2FA.Repo.insert!(%Phoenix2FA.SomeSchema{})
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.

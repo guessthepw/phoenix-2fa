@@ -7,17 +7,17 @@
 # General application configuration
 import Config
 
-config :web_authn_liveview,
-  ecto_repos: [WebAuthnLiveview.Repo]
+config :phoenix_2fa,
+  ecto_repos: [Phoenix2FA.Repo]
 
 # Configures the endpoint
-config :web_authn_liveview, WebAuthnLiveviewWeb.Endpoint,
+config :phoenix_2fa, Phoenix2FAWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [html: WebAuthnLiveviewWeb.ErrorHTML, json: WebAuthnLiveviewWeb.ErrorJSON],
+    formats: [html: Phoenix2FAWeb.ErrorHTML, json: Phoenix2FAWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: WebAuthnLiveview.PubSub,
+  pubsub_server: Phoenix2FA.PubSub,
   live_view: [signing_salt: "5125obt3"]
 
 # Configures the mailer
@@ -27,7 +27,7 @@ config :web_authn_liveview, WebAuthnLiveviewWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :web_authn_liveview, WebAuthnLiveview.Mailer, adapter: Swoosh.Adapters.Local
+config :phoenix_2fa, Phoenix2FA.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,

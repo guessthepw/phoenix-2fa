@@ -5,5 +5,6 @@ defmodule Phoenix2FAWeb.PageController do
     # The home page is often custom made,
     # so skip the default app layout.
     render(conn, :home, layout: false)
+    # redirect(conn, to: ~p"/users/log_in")
   end
 end

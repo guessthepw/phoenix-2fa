@@ -351,4 +351,244 @@ defmodule Phoenix2FA.Accounts do
     end
   end
 
+  alias Phoenix2FA.Accounts.UserKey
+
+  @doc """
+  Returns the list of user_keys.
+
+  ## Examples
+
+      iex> list_user_keys()
+      [%UserKey{}, ...]
+
+  """
+  def list_user_keys do
+    Repo.all(UserKey)
+  end
+
+  @doc """
+  Gets a single user_key.
+
+  Raises `Ecto.NoResultsError` if the User key does not exist.
+
+  ## Examples
+
+      iex> get_user_key!(123)
+      %UserKey{}
+
+      iex> get_user_key!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_key!(id), do: Repo.get!(UserKey, id)
+
+  @doc """
+  Creates a user_key.
+
+  ## Examples
+
+      iex> create_user_key(%{field: value})
+      {:ok, %UserKey{}}
+
+      iex> create_user_key(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_key(attrs \\ %{}) do
+    %UserKey{}
+    |> UserKey.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_key.
+
+  ## Examples
+
+      iex> update_user_key(user_key, %{field: new_value})
+      {:ok, %UserKey{}}
+
+      iex> update_user_key(user_key, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_key(%UserKey{} = user_key, attrs) do
+    user_key
+    |> UserKey.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a user_key.
+
+  ## Examples
+
+      iex> delete_user_key(user_key)
+      {:ok, %UserKey{}}
+
+      iex> delete_user_key(user_key)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_key(%UserKey{} = user_key) do
+    Repo.delete(user_key)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user_key changes.
+
+  ## Examples
+
+      iex> change_user_key(user_key)
+      %Ecto.Changeset{data: %UserKey{}}
+
+  """
+  def change_user_key(%UserKey{} = user_key, attrs \\ %{}) do
+    UserKey.changeset(user_key, attrs)
+  end
+
+  @doc """
+  List all u2f keys for a user
+  """
+  def list_u2f_keys_for_user(%{id: user_id}) do
+    from(key in UserKey)
+    |> where([key], key.user_id == ^user_id and key.kind == :u2f)
+    |> Repo.all()
+  end
+
+  def list_u2f_keys_for_user(user_id) do
+    from(key in UserKey)
+    |> where([key], key.user_id == ^user_id and key.kind == :u2f)
+    |> Repo.all()
+  end
+
+  @doc """
+  List all totp_key keys for a user
+  """
+  def list_totp_key_keys_for_user(user_id) do
+    from(key in UserKey)
+    |> where([key], key.user_id == ^user_id and key.kind == :totp)
+    |> Repo.all()
+  end
+
+  @doc """
+  List all recovery keys for a user
+  """
+  def list_recovery_codes_for_user(user_id) do
+    from(key in UserKey)
+    |> where([key], key.user_id == ^user_id and key.kind == :recovery)
+    |> Repo.all()
+  end
+
+  @doc """
+  Check if a user has recovery codes already
+  """
+  def user_has_recovery_codes?(%{id: user_id}) do
+    user_has_recovery_codes?(user_id)
+  end
+
+  def user_has_recovery_codes?(user_id) do
+    list_recovery_codes_for_user(user_id) != []
+  end
+
+  @recovery_code_len 8
+  @num_recovery_codes 10
+  @doc """
+  Generates a list of unique recovery codes to store for a user.
+
+  ## Examples
+
+    iex> generate_recovery_codes()
+    ["31582325", "93159643", "10424484", "50731921", "56099500", "31542770",
+    "53397924", "63373450", "44424523", "12871382"]
+  """
+  def generate_recovery_codes() do
+    for _count <- 1..@num_recovery_codes do
+      <<n::40>> = :crypto.strong_rand_bytes(5)
+
+      n
+      |> Integer.to_string()
+      |> String.slice(0, @recovery_code_len)
+      |> String.pad_leading(@recovery_code_len, "0")
+    end
+  end
+
+  @doc """
+  Returns the recovery code length
+  """
+  def get_recovery_code_length(), do: @recovery_code_len
+
+  @doc """
+  """
+
+  def get_user_key_by_credential_id(credential_id) do
+    from(key in UserKey)
+    |> where([key], key.cred_id == ^credential_id)
+    |> Repo.one()
+  end
+
+  @doc """
+  List all user keys for a user
+  """
+  def list_user_keys_for_user(user_id) do
+    from(key in UserKey)
+    |> where([key], key.user_id == ^user_id)
+    |> Repo.all()
+  end
+
+  @doc """
+  Set up a TOTP secret for confirmation
+
+  Takes the user struct of the user trying to register a new key and returns a map with
+  two keys. secret and qr_code_uri.
+  """
+
+  def setup_totp_for_confirmation(current_user) do
+    secret = NimbleTOTP.secret()
+
+    qr_code_uri =
+      NimbleTOTP.otpauth_uri("Phoenix2FA:#{current_user.email}", secret, issuer: "Phoenix2FA")
+
+    %{secret: secret, qr_code_uri: qr_code_uri}
+  end
+
+  @doc """
+  Set up a U2F secret for confirmation
+
+  Takes the user struct of the user trying to register a new key and returns a map with
+  two keys. challenge and cred_ids.
+  """
+
+  def setup_u2f_for_confirmation(current_user) do
+    challenge = Wax.new_registration_challenge([])
+
+    cred_ids =
+      list_u2f_keys_for_user(current_user)
+      |> Enum.map(& &1.cred_id)
+
+    %{challenge: challenge, cred_ids: cred_ids}
+  end
+
+  @doc """
+  Generate and save recovery codes for a user
+  """
+
+  def create_valid_recovery_codes(current_user) do
+    generate_recovery_codes()
+    |> Enum.reduce(Ecto.Multi.new(), fn recovery_code, multi ->
+      user_key_attrs = %{
+        user_id: current_user.id,
+        mfa_key: recovery_code,
+        last_used: DateTime.utc_now(),
+        kind: :recovery,
+        label: "Backup recovery codes",
+        cred_id: recovery_code
+      }
+
+      changeset = UserKey.changeset(%UserKey{}, user_key_attrs)
+
+      Ecto.Multi.insert(multi, recovery_code, changeset, [])
+    end)
+    |> Repo.transaction()
+  end
 end

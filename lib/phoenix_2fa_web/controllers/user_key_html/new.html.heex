@@ -1,0 +1,20 @@
+<.header>
+  New User key - <%= @kind %>
+</.header>
+
+<.u2f_registration_form
+  :if={@kind == :u2f}
+  challenge={@challenge}
+  cred_ids={@cred_ids}
+  current_user={@current_user}
+/>
+
+<.totp_registration_form
+  :if={@kind == :totp}
+  qr_code_uri={@qr_code_uri}
+  current_user={@current_user}
+/>
+
+<.user_key_form :if={@kind == nil} action={~p"/users/user_keys/create"} />
+
+<.back navigate={~p"/users/user_keys"}>Back to user_keys</.back>

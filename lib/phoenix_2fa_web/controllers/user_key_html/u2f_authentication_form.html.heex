@@ -1,0 +1,77 @@
+<section class="has-text-left">
+  <img id="auth-img" src={~p"/images/fingerprint-scanning.svg"} />
+
+  <p>
+    Please Authenticate your device now
+  </p>
+  <.simple_form :let={f} for={%{}} action={~p"/users/user_keys/confirm"} id="waf" method="post">
+    <.input field={f[:rawID]} type="hidden" id="rawID" />
+    <.input field={f[:type]} type="hidden" id="type" />
+    <.input field={f[:clientDataJSON]} type="hidden" id="clientDataJSON" />
+    <.input field={f[:authenticatorData]} type="hidden" id="authenticatorData" />
+    <.input field={f[:sig]} type="hidden" id="sig" />
+    <.input field={f[:kind]} type="hidden" value="u2f" />
+
+    <:actions>
+      <.button
+        id="force-prompt-for-authenticator-button"
+        type="button"
+        phx-disable-with="Saving..."
+      >
+        Prompt for Authenticator
+      </.button>
+      <.button type="submit" phx-disable-with="Loading...">Verify</.button>
+    </:actions>
+  </.simple_form>
+</section>
+<.javascript_helper_functions />
+<script>
+  function triggerAuthenticate(){
+    const rawId = document.getElementById('rawID');
+    const type = document.getElementById('type');
+    const clientDataJSON = document.getElementById('clientDataJSON');
+    const authenticatorData = document.getElementById('authenticatorData');
+    const forcePromptForAuthenticatorButton = document.getElementById('force-prompt-for-authenticator-button');
+    const authImg = document.getElementById('auth-img');
+    const sig = document.getElementById('sig');
+    const authenticationForm = document.getElementById('waf');
+
+    forcePromptForAuthenticatorButton.style.display = 'none';
+    authImg.style.display = 'inline';
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredential
+    navigator.credentials.get({
+      publicKey: {
+        challenge: _base64ToArrayBuffer("<%= @challenge.bytes |> Base.encode64() %>"),
+        allowCredentials: [
+        <%= for cred_id <- @cred_ids do %>
+          {
+            id: _base64ToArrayBuffer("<%= cred_id %>"),
+            type: "public-key"
+          },
+        <% end %>
+        ]
+      }
+    }).then(function (newCredential) {
+      // Set the hidden input values
+      rawId.value = _arrayBufferToBase64(newCredential.rawId);
+      type.value = newCredential.type;
+      clientDataJSON.value = _arrayBufferToString(newCredential.response.clientDataJSON)
+      authenticatorData.value = _arrayBufferToBase64(newCredential.response.authenticatorData)
+      sig.value = _arrayBufferToBase64(newCredential.response.signature)
+
+      // Submit the form
+      document.getElementById('waf').submit();
+    }).catch((err) => {
+      if(err.name == 'NotAllowedError') {
+          forcePromptForAuthenticatorButton.style.display = 'inline-block';
+          authImg.style.display = 'none';
+        }
+      else {
+          console.log(err);
+        }
+    });
+  }
+
+  triggerAuthenticate()
+</script>

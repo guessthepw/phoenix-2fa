@@ -32,7 +32,7 @@ defmodule Phoenix2FAWeb.UserAuth do
     conn
     |> renew_session()
     |> put_token_in_session(token)
-    # |> Plug.Conn.assign(:current_user, user)
+    |> Plug.Conn.assign(:current_user, user)
     |> maybe_write_remember_me_cookie(token, params)
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
@@ -224,5 +224,5 @@ defmodule Phoenix2FAWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: ~p"/"
+  defp signed_in_path(_), do: ~p"/users/user_keys"
 end

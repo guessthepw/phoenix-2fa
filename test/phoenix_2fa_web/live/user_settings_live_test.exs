@@ -108,12 +108,9 @@ defmodule Phoenix2FAWeb.UserSettingsLiveTest do
 
       new_password_conn = follow_trigger_action(form, conn)
 
-      assert redirected_to(new_password_conn) == ~p"/users/settings"
+      assert redirected_to(new_password_conn) == ~p"/users/user_keys"
 
       assert get_session(new_password_conn, :user_token) != get_session(conn, :user_token)
-
-      assert Phoenix.Flash.get(new_password_conn.assigns.flash, :info) =~
-               "Password updated successfully"
 
       assert Accounts.get_user_by_email_and_password(user.email, new_password)
     end

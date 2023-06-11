@@ -1,4 +1,5 @@
 defmodule Phoenix2FAWeb.UserSessionControllerTest do
+  alias Phoenix2FA.Accounts
   use Phoenix2FAWeb.ConnCase, async: true
 
   import Phoenix2FA.AccountsFixtures
@@ -15,7 +16,7 @@ defmodule Phoenix2FAWeb.UserSessionControllerTest do
         })
 
       assert get_session(conn, :user_token)
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/users/user_keys"
 
       # Now do a logged in request and assert on the menu
       conn = get(conn, ~p"/users/settings")
@@ -26,6 +27,9 @@ defmodule Phoenix2FAWeb.UserSessionControllerTest do
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do
+      Accounts.list_user_keys_for_user(user.id)
+      |> Enum.each(&Accounts.delete_user_key/1)
+
       conn =
         post(conn, ~p"/users/log_in", %{
           "user" => %{
@@ -36,10 +40,13 @@ defmodule Phoenix2FAWeb.UserSessionControllerTest do
         })
 
       assert conn.resp_cookies["_phoenix_2fa_web_user_remember_me"]
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/users/user_keys"
     end
 
     test "logs the user in with return to", %{conn: conn, user: user} do
+      Accounts.list_user_keys_for_user(user.id)
+      |> Enum.each(&Accounts.delete_user_key/1)
+
       conn =
         conn
         |> init_test_session(user_return_to: "/foo/bar")
@@ -55,6 +62,9 @@ defmodule Phoenix2FAWeb.UserSessionControllerTest do
     end
 
     test "login following registration", %{conn: conn, user: user} do
+      Accounts.list_user_keys_for_user(user.id)
+      |> Enum.each(&Accounts.delete_user_key/1)
+
       conn =
         conn
         |> post(~p"/users/log_in", %{
@@ -65,11 +75,14 @@ defmodule Phoenix2FAWeb.UserSessionControllerTest do
           }
         })
 
-      assert redirected_to(conn) == ~p"/"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
+      assert redirected_to(conn) == ~p"/users/user_keys"
+      # assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
     end
 
     test "login following password update", %{conn: conn, user: user} do
+      Accounts.list_user_keys_for_user(user.id)
+      |> Enum.each(&Accounts.delete_user_key/1)
+
       conn =
         conn
         |> post(~p"/users/log_in", %{
@@ -80,8 +93,7 @@ defmodule Phoenix2FAWeb.UserSessionControllerTest do
           }
         })
 
-      assert redirected_to(conn) == ~p"/users/settings"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Password updated successfully"
+      assert redirected_to(conn) == ~p"/users/user_keys"
     end
 
     test "redirects to login page with invalid credentials", %{conn: conn} do

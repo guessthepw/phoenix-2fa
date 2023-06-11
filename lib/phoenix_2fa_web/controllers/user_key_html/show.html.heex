@@ -1,0 +1,19 @@
+<.header>
+  User key <%= @user_key.id %>
+  <:subtitle>This is a user_key record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/users/user_keys/#{@user_key}/edit"}>
+      <.button>Edit user_key</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Cred"><%= @user_key.cred_id %></:item>
+  <:item title="Label"><%= @user_key.label %></:item>
+  <:item title="Last used"><%= @user_key.last_used %></:item>
+  <:item title="Mfa key"><%= @user_key.mfa_key %></:item>
+  <:item title="Kind"><%= @user_key.kind %></:item>
+</.list>
+
+<.back navigate={~p"/users/user_keys"}>Back to user_keys</.back>

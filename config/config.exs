@@ -59,6 +59,12 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Fido 2 Authentication
+config :wax_,
+  origin: "https://phoenix-2fa.fly.dev",
+  rp_id: :auto,
+  allowed_attestation_types: [:basic, :uncertain, :attca]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

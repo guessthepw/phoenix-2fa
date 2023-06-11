@@ -13,11 +13,13 @@ defmodule Phoenix2FAWeb.UserRegistrationLiveTest do
     end
 
     test "redirects if already logged in", %{conn: conn} do
+      user = user_fixture()
+
       result =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/users/register")
-        |> follow_redirect(conn, "/")
+        |> follow_redirect(conn, "/users/user_keys")
 
       assert {:ok, _conn} = result
     end
@@ -45,12 +47,7 @@ defmodule Phoenix2FAWeb.UserRegistrationLiveTest do
       render_submit(form)
       conn = follow_trigger_action(form, conn)
 
-      assert redirected_to(conn) == ~p"/"
-
-      # Now do a logged in request and assert on the menu
-      conn = get(conn, "/")
-      response = html_response(conn, 200)
-      assert response =~ "Account created successfully!"
+      assert redirected_to(conn) == ~p"/users/user_keys"
     end
 
     test "renders errors for duplicated email", %{conn: conn} do

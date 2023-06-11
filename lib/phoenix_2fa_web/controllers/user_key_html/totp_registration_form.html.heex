@@ -1,0 +1,23 @@
+<h3 class="has-text-center is-size-4 mb-3">Please label and verify your key below</h3>
+
+<div>
+  <div>
+    <%= Phoenix.HTML.raw(@qr_code_uri |> EQRCode.encode() |> EQRCode.SVG.svg()) %>
+    <article class="message">
+      <div class="message-body">
+        <strong>URI:</strong> <%= @qr_code_uri %>
+      </div>
+    </article>
+  </div>
+  <.simple_form :let={f} action={~p"/users/user_keys/validate"} for={%{}}>
+    <.input type="hidden" field={f[:kind]} value="totp" />
+    <.input type="text" field={f[:label]} label="Label" />
+    <.input type="text" field={f[:one_time_code]} label="One Time Code:" />
+
+    <:actions>
+      <.button type="submit" phx-disable-with="Saving...">
+        Save User Key
+      </.button>
+    </:actions>
+  </.simple_form>
+</div>

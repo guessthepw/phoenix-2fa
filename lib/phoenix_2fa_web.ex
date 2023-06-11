@@ -69,6 +69,7 @@ defmodule Phoenix2FAWeb do
   def html do
     quote do
       use Phoenix.Component
+      import Phoenix2FAWeb.CoreComponents
 
       # Import convenience functions from controllers
       import Phoenix.Controller,

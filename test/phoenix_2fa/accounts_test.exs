@@ -530,7 +530,7 @@ defmodule Phoenix2FA.AccountsTest do
         cred_id: "some cred_id",
         kind: :u2f,
         label: "some label",
-        last_used: ~U[2023-04-28 14:19:00Z],
+        last_used: ~U[2023-06-09 14:32:00Z],
         mfa_key: "some mfa_key",
         user_id: user.id
       }
@@ -539,7 +539,7 @@ defmodule Phoenix2FA.AccountsTest do
       assert user_key.cred_id == "some cred_id"
       assert user_key.kind == :u2f
       assert user_key.label == "some label"
-      assert user_key.last_used == ~U[2023-04-28 14:19:00Z]
+      assert user_key.last_used == ~U[2023-06-09 14:32:00Z]
       assert user_key.mfa_key == "some mfa_key"
     end
 
@@ -554,7 +554,7 @@ defmodule Phoenix2FA.AccountsTest do
         cred_id: "some updated cred_id",
         kind: :totp,
         label: "some updated label",
-        last_used: ~U[2023-04-29 14:19:00Z],
+        last_used: ~U[2023-06-10 14:32:00Z],
         mfa_key: "some updated mfa_key"
       }
 
@@ -562,7 +562,7 @@ defmodule Phoenix2FA.AccountsTest do
       assert user_key.cred_id == "some updated cred_id"
       assert user_key.kind == :totp
       assert user_key.label == "some updated label"
-      assert user_key.last_used == ~U[2023-04-29 14:19:00Z]
+      assert user_key.last_used == ~U[2023-06-10 14:32:00Z]
       assert user_key.mfa_key == "some updated mfa_key"
     end
 

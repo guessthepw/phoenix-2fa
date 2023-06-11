@@ -14,11 +14,13 @@ defmodule Phoenix2FAWeb.UserLoginLiveTest do
     end
 
     test "redirects if already logged in", %{conn: conn} do
+      user = user_fixture()
+
       result =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/users/log_in")
-        |> follow_redirect(conn, "/")
+        |> follow_redirect(conn, "/users/user_keys")
 
       assert {:ok, _conn} = result
     end
@@ -31,12 +33,11 @@ defmodule Phoenix2FAWeb.UserLoginLiveTest do
 
       {:ok, lv, _html} = live(conn, ~p"/users/log_in")
 
-      form =
-        form(lv, "#login_form", user: %{email: user.email, password: password, remember_me: true})
+      form = form(lv, "#login_form", user: %{email: user.email, password: password})
 
       conn = submit_form(form, conn)
 
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/users/user_keys"
     end
 
     test "redirects to login page with a flash error if there are no valid credentials", %{

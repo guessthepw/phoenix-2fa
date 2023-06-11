@@ -1,0 +1,22 @@
+<.simple_form
+  :let={f}
+  :if={@kind != :u2f}
+  for={%{}}
+  action={~p"/users/user_keys/confirm"}
+  method="post"
+>
+  <.input field={f[:kind]} type="hidden" value={@kind} />
+  <.input field={f[:user_id]} type="hidden" value={@user_id} />
+  <.input field={f[:key]} type="text" label={"Enter your #{@kind} secret below"} />
+
+  <:actions :if={@kind != :u2f}>
+    <.button type="submit" phx-disable-with="Loading...">Verify</.button>
+  </:actions>
+</.simple_form>
+
+<.u2f_authentication_form
+  :if={@kind == :u2f}
+  challenge={@challenge}
+  cred_ids={@cred_ids}
+  user_id={@user_id}
+/>

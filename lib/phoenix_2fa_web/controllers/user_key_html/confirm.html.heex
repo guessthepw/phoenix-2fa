@@ -1,0 +1,20 @@
+<.header>
+  Choose how you would like to verify your identiy
+</.header>
+
+<.simple_form :let={f} for={%{}} action={~p"/users/user_keys/confirm"} method="post">
+  <.input
+    field={f[:kind]}
+    type="select"
+    prompt="Choose a verification method"
+    options={Ecto.Enum.values(Phoenix2FA.Accounts.UserKey, :kind)}
+  />
+
+  <.input field={f[:user_id]} type="hidden" value={@user_id} />
+
+  <:actions>
+    <.button type="submit" phx-disable-with="Loading...">
+      Verify
+    </.button>
+  </:actions>
+</.simple_form>

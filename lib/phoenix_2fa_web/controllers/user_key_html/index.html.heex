@@ -1,0 +1,26 @@
+<.header>
+  Listing User keys
+  <:actions>
+    <.link href={~p"/users/user_keys/new"}>
+      <.button>New User key</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="user_keys" rows={@user_keys} row_click={&JS.navigate(~p"/users/user_keys/#{&1}")}>
+  <:col :let={user_key} label="Label"><%= user_key.label %></:col>
+  <:col :let={user_key} label="Cred"><%= user_key.cred_id |> String.slice(0..10) %></:col>
+  <:col :let={user_key} label="Last used"><%= user_key.last_used %></:col>
+  <:col :let={user_key} label="Kind"><%= user_key.kind %></:col>
+  <:action :let={user_key}>
+    <div class="sr-only">
+      <.link navigate={~p"/users/user_keys/#{user_key}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/users/user_keys/#{user_key}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={user_key}>
+    <.link href={~p"/users/user_keys/#{user_key}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

@@ -1,0 +1,37 @@
+<.simple_form :let={f} :if={String.contains?(@action, "/create")} for={%{}} action={@action}>
+  <.input
+    field={f[:kind]}
+    type="select"
+    label="Kind"
+    prompt="Choose a value"
+    options={Ecto.Enum.values(Phoenix2FA.Accounts.UserKey, :kind)}
+  />
+  <:actions>
+    <.button>Create User key</.button>
+  </:actions>
+</.simple_form>
+
+<.simple_form
+  :let={f}
+  :if={!String.contains?(@action, "/create")}
+  for={@changeset}
+  action={@action}
+>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:cred_id]} type="text" label="Cred" />
+  <.input field={f[:label]} type="text" label="Label" />
+  <.input field={f[:last_used]} type="datetime-local" label="Last used" />
+  <.input field={f[:mfa_key]} type="text" label="Mfa key" />
+  <.input
+    field={f[:kind]}
+    type="select"
+    label="Kind"
+    prompt="Choose a value"
+    options={Ecto.Enum.values(Phoenix2FA.Accounts.UserKey, :kind)}
+  />
+  <:actions>
+    <.button>Save User key</.button>
+  </:actions>
+</.simple_form>

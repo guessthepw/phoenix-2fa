@@ -1,4 +1,5 @@
 defmodule Phoenix2FAWeb.Router do
+  alias Phoenix2FAWeb.UserKeyController
   use Phoenix2FAWeb, :router
 
   import Phoenix2FAWeb.UserAuth
@@ -59,6 +60,23 @@ defmodule Phoenix2FAWeb.Router do
     end
 
     post "/users/log_in", UserSessionController, :create
+  end
+
+  scope "/" do
+    pipe_through [:browser]
+
+    get "/users/user_keys/confirm", UserKeyController, :confirm
+    post "/users/user_keys/confirm", UserKeyController, :confirm
+    post "/users/user_keys/confirm/:kind", UserKeyController, :confirm_key
+  end
+
+  scope "/" do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/users/user_keys/new", UserKeyController, :new
+    post "/users/user_keys/create", UserKeyController, :create
+    post "/users/user_keys/validate", UserKeyController, :validate
+    resources "/users/user_keys", UserKeyController, except: [:new, :create]
   end
 
   scope "/", Phoenix2FAWeb do

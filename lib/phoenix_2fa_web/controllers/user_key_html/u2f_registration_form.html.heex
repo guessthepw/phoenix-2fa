@@ -1,0 +1,111 @@
+<section class="has-text-left">
+  <img id="auth-img" src={~p"/images/fingerprint-scanning.svg"} />
+
+  <p>
+    <em><%= String.capitalize(@current_user.email) %></em>,
+    please give your device a name and then authenticate
+  </p>
+  <.simple_form :let={f} for={%{}} action={~p"/users/user_keys/validate"} id="waf" method="post">
+    <.input field={f[:label]} type="text" id="label" label="Device Label" />
+    <.input field={f[:cred_id_already_used]} type="hidden" value="false" id="credIdAlreadyUsed" />
+    <.input field={f[:rawID]} type="hidden" id="rawID" />
+    <.input field={f[:type]} type="hidden" id="type" value="u2f" />
+    <.input field={f[:clientDataJSON]} type="hidden" id="clientDataJSON" />
+    <.input field={f[:attestationObject]} type="hidden" id="attestationObject" />
+    <.input field={f[:kind]} type="hidden" value="u2f" />
+
+    <:actions>
+      <.button
+        id="force-prompt-for-authenticator-button"
+        type="button"
+        phx-disable-with="Saving..."
+      >
+        Prompt for Authenticator
+      </.button>
+    </:actions>
+  </.simple_form>
+</section>
+<.javascript_helper_functions />
+<script>
+  const challenge_b64 = "<%= @challenge.bytes |> Base.encode64() %>";
+  const rp_id = "<%= @challenge.rp_id %>";
+  const user_email = "<%= @current_user.email %>";
+  const user_id = "<%= Base.encode64("#{@current_user.id}") %>";
+  const user_name = "<%= @current_user.email %>";
+  const rawId = document.getElementById('rawID');
+  const type = document.getElementById('type');
+  const clientDataJSON = document.getElementById('clientDataJSON');
+  const attestationObject = document.getElementById('attestationObject');
+  const forcePromptForAuthenticatorButton = document.getElementById('force-prompt-for-authenticator-button');
+  const authImg = document.getElementById('auth-img');
+  const credIdAlreadyUsed = document.getElementById('credIdAlreadyUsed');
+  const registrationForm = document.getElementById('waf');
+
+  function triggerAttestation(){
+    document.getElementById('force-prompt-for-authenticator-button').style.display = 'none';
+    document.getElementById('auth-img').style.display = 'inline';
+
+    // https://www.w3.org/TR/webauthn-2/#sctn-attestation
+    const attestation_conveyance_preference = "none";
+    const challenge = _base64ToArrayBuffer(challenge_b64);
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredential
+    navigator.credentials.create({
+    publicKey: {
+      challenge: challenge,
+      rp: {
+        id: rp_id,
+        name: 'Semsee'
+      },
+      user: {
+        id: _base64ToArrayBuffer(user_id),
+        name: user_email,
+        displayName: user_name
+      },
+      pubKeyCredParams: [
+        {
+          type: "public-key",
+          // The Relying Party will accept either an ES256 or RS256 credential,
+          // but prefers an ES256 credential.The one below is: "ES256" IANA COSE Algorithms registry.
+          alg: -7
+        }
+      ],
+      attestation: attestation_conveyance_preference,
+       authenticatorSelection: {
+        residentKey: 'preferred'
+      },
+      // Do not allow the user to register the same key twice
+       excludeCredentials: [
+         <%= for cred_id <- @cred_ids do %>
+           {
+            id: _base64ToArrayBuffer("<%= cred_id %>"),
+            type: "public-key",
+          },
+        <% end %>
+      ]
+    }
+    }).then(function (newCredential) {
+      // Set the hidden input values
+      rawID.value = _arrayBufferToBase64(newCredential.rawId);
+      type.value = newCredential.type;
+      clientDataJSON.value = _arrayBufferToString(newCredential.response.clientDataJSON)
+      attestationObject.value = _arrayBufferToBase64(newCredential.response.attestationObject)
+
+      // Submit the Form
+      registrationForm.submit();
+    }).catch(function (err) {
+      if(err.name == 'NotAllowedError') {
+        forcePromptForAuthenticatorButton.style.display = 'inline-block';
+        authImg.style.display = 'none';
+      } else if (err.name == 'InvalidStateError') {
+        // The key was already used
+        credIdAlreadyUsed.value = true;
+        registrationForm.submit();
+      } else {
+        console.log(err);
+      }
+    });
+  }
+
+  triggerAttestation();
+</script>

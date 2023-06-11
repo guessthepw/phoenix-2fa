@@ -17,11 +17,13 @@ defmodule Phoenix2FAWeb.UserForgotPasswordLiveTest do
     end
 
     test "redirects if already logged in", %{conn: conn} do
+      user = user_fixture()
+
       result =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/users/reset_password")
-        |> follow_redirect(conn, ~p"/")
+        |> follow_redirect(conn, ~p"/users/user_keys")
 
       assert {:ok, _conn} = result
     end

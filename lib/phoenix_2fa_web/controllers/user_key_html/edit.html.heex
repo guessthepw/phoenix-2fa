@@ -1,0 +1,8 @@
+<.header>
+  Edit User key <%= @user_key.id %>
+  <:subtitle>Use this form to manage user_key records in your database.</:subtitle>
+</.header>
+
+<.user_key_form changeset={@changeset} action={~p"/users/user_keys/#{@user_key}"} />
+
+<.back navigate={~p"/users/user_keys"}>Back to user_keys</.back>

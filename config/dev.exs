@@ -78,3 +78,8 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :wax_,
+  origin: "http://localhost:4000",
+  rp_id: :auto,
+  allowed_attestation_types: [:basic, :uncertain, :attca]
